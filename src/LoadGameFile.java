@@ -35,10 +35,9 @@ public class LoadGameFile {
 	}
 	
 	
-    public static void main(String[] args) {
+    public static void LoadScenario(String[] args) {
     	int level, mines, time, supermine; 
-
-        System.out.println("Working Directory = " + System.getProperty("user.dir"));
+    	
         String filePath = "./medialab/level_1_example.txt"; // replace with your file path
         
         try (BufferedReader init_br = new BufferedReader(new FileReader(filePath))) {
