@@ -4,41 +4,55 @@ import java.io.IOException;
 
 
 public class LoadGameFile {
-	public static class InvalidLineNumber extends Exception {
-		public InvalidLineNumber(String message) {
+	private Minesweeper minesweeper;
+	
+	/**
+	 * Returns the minesweeper object.
+	 * @return Minesweeper
+	 */
+	public Minesweeper getMinesweeper() {
+		return minesweeper;
+	}
+
+	/**
+	 * Exception class for Invalid Input File. Exception is called when the input file 
+	 * has wrong description (aka wrong line number)
+	 * @author aliga
+	 *
+	 */
+	public static class InvalidDescription extends Exception {
+		public InvalidDescription(String message) {
 			super(message);
 		}
 	}
 	
-	public static class InvalidLevelValue extends Exception {
-		public InvalidLevelValue(String message) {
+	/**
+	 * Exception class for Invalid Input Value. Exception is either called when a invalid level is specified (not 1 or 2)
+	 * or Wrong Mine Count (out of bounds for each level) or Wrong Time Value (out of bounds for each level) or Wrong 
+	 * Supemine setting (only level 2 of difficulty can have a supermine active).
+	 * @author aliga
+	 *
+	 */
+	public static class InvalidValue extends Exception {
+		public InvalidValue(String message) {
 			super(message);
 		}
 	}
 	
-	public static class InvalidMineValue extends Exception {
-		public InvalidMineValue(String message) {
-			super(message);
-		}
-	}
-	
-	public static class InvalidTimeValue extends Exception {
-		public InvalidTimeValue(String message) {
-			super(message);
-		}
-	}
-	
-	public static class InvalidSupermineValue extends Exception {
-		public InvalidSupermineValue(String message) {
-			super(message);
-		}
-	}
-	
-	
-    public static void LoadScenario(String[] args) {
+	/**
+	 * The method reads from a file input named SCENARIO-id.txt and parses its line. The file must be of the following form:
+	 * 	- level
+	 * 	- mines
+	 *  - time
+	 *  - supermine
+	 * Each value line is identified being inbound or out of bounds. In the latter case the corresponding exception is called.
+	 * @param id Specifies the SCENARIO-id.txt. to be loaded from file system. Only valid id numbers are
+	 * accepted or an exception is called. 
+	 */
+    public void LoadScenario(String id) {
     	int level, mines, time, supermine; 
     	
-        String filePath = "./medialab/level_1_example.txt"; // replace with your file path
+        String filePath = "./medialab/SCENARIO-" + id + ".txt"; // replace with your file path
         
         try (BufferedReader init_br = new BufferedReader(new FileReader(filePath))) {
         	int lines = 0;
@@ -48,7 +62,7 @@ public class LoadGameFile {
                 System.out.println(line);
             }
             if (lines != 4) {
-            	throw new InvalidLineNumber("Input file lines must be equal to 4!");
+            	throw new InvalidDescription("Input file lines must be equal to 4!");
             }
             init_br.close();
             
@@ -56,26 +70,24 @@ public class LoadGameFile {
             
             line = br.readLine();
             level = Integer.parseInt(line);
-            System.out.println(level);
             if (level != 1 && level != 2) {
             	br.close();
-            	throw new InvalidLevelValue("Level can only be of type 1 or 2!");            	
+            	throw new InvalidValue("Level can only be of type 1 or 2!");            	
             }            
             
             line = br.readLine();
             mines = Integer.parseInt(line);
-            System.out.println(mines);
             switch (level) {
             	case 1:
             		if (mines < 9 || mines > 11) {
             			br.close();
-            			throw new InvalidMineValue("For level of difficulty 1 the mines must be between 9 and 11!");
+            			throw new InvalidValue("For level of difficulty 1 the mines must be between 9 and 11!");
             		}
             		break;
             	case 2: 
             		if (mines < 35 || mines > 45) {
             			br.close();
-            			throw new InvalidMineValue("For level of difficulty 2 the mines must be between 35 and 45!");
+            			throw new InvalidValue("For level of difficulty 2 the mines must be between 35 and 45!");
             		}
             		break;
             }
@@ -86,13 +98,13 @@ public class LoadGameFile {
         	case 1:
         		if (time < 120 || time > 180) {
         			br.close();
-        			throw new InvalidTimeValue("For level of difficulty 1 the time must be between 120 and 180!");
+        			throw new InvalidValue("For level of difficulty 1 the time must be between 120 and 180!");
         		}
         		break;
         	case 2: 
         		if (time < 240 || time > 360) {
         			br.close();
-        			throw new InvalidTimeValue("For level of difficulty 2 the mines must be between 240 and 360!");
+        			throw new InvalidValue("For level of difficulty 2 the mines must be between 240 and 360!");
         		}
         		break;
             }
@@ -103,32 +115,30 @@ public class LoadGameFile {
             case 1:
             	if (supermine != 0) {
         			br.close();
-        			throw new InvalidSupermineValue("For level of difficulty 1 the supermine is unavailable!");
+        			throw new InvalidValue("For level of difficulty 1 the supermine is unavailable!");
             	}
             	break;
             case 2: 
             	if (supermine != 0 && supermine != 1) {
         			br.close();
-        			throw new InvalidSupermineValue("For level of difficulty 2 the supermine must be either 0 or 1!");
+        			throw new InvalidValue("For level of difficulty 2 the supermine must be either 0 or 1!");
             	}
             	break;
             }
             br.close();
             
+            Minesweeper minesweeper = new Minesweeper(level, mines, time, supermine);
+            this.minesweeper = minesweeper;
+            
+            
+            
             
         } catch (IOException e) {
             e.printStackTrace();
-        } catch	(InvalidLineNumber e) {
+        } catch	(InvalidDescription e) {
         	System.out.println("Error: " + e.getMessage());
-        } catch	(InvalidLevelValue e) {
-        	System.out.println("Error: " + e.getMessage());
-        } catch	(InvalidMineValue e) {
-        	System.out.println("Error: " + e.getMessage());
-        } catch	(InvalidTimeValue e) {
-        	System.out.println("Error: " + e.getMessage());
-        } catch	(InvalidSupermineValue e) {
+        } catch	(InvalidValue e) {
         	System.out.println("Error: " + e.getMessage());
         }
-        
     }
 }
